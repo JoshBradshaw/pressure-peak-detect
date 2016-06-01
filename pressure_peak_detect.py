@@ -126,15 +126,16 @@ def test_peak_threshold():
     print pt.update(5)
     print pt.update(5)
 
-def estimate_all_R_wave_locations(bp_vector, sampling_rate, output_type='sample_idx'):    
+def estimate_all_R_wave_locations(bp_vector, sampling_rate, output_type='time'):    
     """returns a list of the R wave locations, in samples
     
     output_types:
         sample_idx -- a list of the bp_vector sample indexes which correspond to R-wave locations
         time -- the times of the R wave locations in seconds, relative to the start of bp_vector
     """
+    x = np.linspace(0, len(bp_vector)/sampling_rate, len(bp_vector))
     R_wave_locations = []  
-
+    plt.plot(x, bp_vector)
     lp_filtered_vector = butter_lowpass_filter(bp_vector, LOWPASS_FILTER_CUTTOFF_FREQUENCY, 
                               sampling_rate, order=LOWPASS_FILTER_ORDER)
               
@@ -143,10 +144,13 @@ def estimate_all_R_wave_locations(bp_vector, sampling_rate, output_type='sample_
     peak_thresholder = PeakThreshold(ssf_transformed_vector, sampling_rate)
     p_threshold = peak_thresholder.get_threshold()
     rolling_point_buffer = collections.deque(np.zeros(ROLLING_POINT_SPACING), maxlen=ROLLING_POINT_SPACING)  
-    r_period_count = 0
+    r_period_count = REFRACTORY_PERIOD
     rising_edge = False
     
     # peak detection state machine
+    # criteria for a peak detection:
+    # 1. slope is trending upwards
+    # 2. refractory period since last peak detection is over
     for sample_num, bp_val in enumerate(ssf_transformed_vector):
         lrp = rolling_point_buffer[0] # left rolling point
         rrp = bp_val # right rolling point
@@ -168,7 +172,9 @@ def estimate_all_R_wave_locations(bp_vector, sampling_rate, output_type='sample_
     if output_type=='sample_idx':
         return R_wave_locations
     elif output_type=='time':
-        return np.array(R_wave_locations) / sampling_rate
+        R_wave_times = np.array(R_wave_locations) / sampling_rate
+        plt.plot(R_wave_times, np.ones(len(R_wave_times))*2, 'go') 
+        return R_wave_times
     else:
         error_msg = "output_type: '{}' is invalid".format(output_type)
         raise ValueError(error_msg)
