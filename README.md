@@ -2,7 +2,7 @@
 A script for detecting the pressure peaks in a noisy blood pressure waveform, measured through pulse-ox, ultrasound, direct, or any other method that produces a reasonably good trace.
 
 
-This script implements the algorithm described in [An Open-source Algorithm to Detect Onset of Arterial Blood Pressure Pulses](https://lcp.mit.edu/pdf/Zong03a.pdf)
+This script implements the algorithm described in [An Open-source Algorithm to Detect Onset of Arterial Blood Pressure Pulses by W Zong, T Heldt, GB Moody, and RG Mark](https://lcp.mit.edu/pdf/Zong03a.pdf)
 
 The script at two primary modes of operation. It can be used to detect the onset of blood pressure peaks like so:
 
